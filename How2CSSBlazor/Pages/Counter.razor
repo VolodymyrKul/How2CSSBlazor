@@ -1,0 +1,20 @@
+﻿@page "/counter"
+@inject NavigationManager UriHelper
+@inject Blazored.LocalStorage.ILocalStorageService localStore
+
+<h1>Counter</h1>
+
+<p>Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int currentCount = 0;
+
+    private async void IncrementCount()
+    {
+        //currentCount++;
+        await localStore.SetItemAsync("item", "testsave");
+        UriHelper.NavigateTo("/signin");
+    }
+}

@@ -1,0 +1,80 @@
+﻿@page "/account"
+@inject Blazored.LocalStorage.ILocalStorageService localStore
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+<div class="container">
+    <div class="btn-group-vertical w-25 mt-5" style="float: left;">
+        <button type="button" class="btn btn-primary">Profile</button>
+        <button type="button" class="btn btn-primary">Open test</button>
+        <button type="button" class="btn btn-primary dropup" @onclick="ChnageAchievMode">
+            Achievements<span style="float: right; cursor: pointer;"><i class="@CssClass()"></i></span>
+        </button>
+        @if (AchievMode)
+        {
+            <a class="btn btn-primary" href="/ownachievs">My achievements</a>
+            <a class="btn btn-primary" href="/antachievs">Another user achievements</a>
+            <a class="btn btn-primary" href="/compareachievs">Compare achievements</a>
+        }
+        <button type="button" class="btn btn-primary">Option 1</button>
+        <button type="button" class="btn btn-primary">Save achivement</button>
+        <button type="button" class="btn btn-primary">About</button>
+    </div>
+    <div class="w-50 mt-5" style="float: left;"></div>
+    <div class="w-25 mt-5" style="float: left;">
+        <div class="card mx-auto bg-secondary" style="width:300px; position: relative;">
+            <img class="card-img-top" style="width:300px; height: 400px;" src="https://www.clker.com/cliparts/g/l/R/7/h/u/teamstijl-person-icon-blue.svg" alt="Card image">
+            <div class="card-body">
+                @if (profileUser != null)
+                {
+                    <h4 class="card-title" style="text-align: center;">@profileUser.FirstName @profileUser.LastName</h4>
+                    <h5 class="card-title" style="text-align: center;">@profileUser.Email</h5>
+                    <h5 class="card-title" style="text-align: center;">@profileUser.Phone</h5>
+                    <h5 class="card-title" style="text-align: center;">@profileUser.Role</h5>
+                }
+                else
+                {
+                    <h4 class="card-title" style="text-align: center;">Load...</h4>
+                    <h5 class="card-title" style="text-align: center;">Load...</h5>
+                    <h5 class="card-title" style="text-align: center;">Load...</h5>
+                    <h5 class="card-title" style="text-align: center;">Load...</h5>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+
+    private bool AchievMode { get; set; } = false;
+    private ProfileUser profileUser { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        string curuser = await localStore.GetItemAsync<string>("currentuser");
+        HttpClient client = new HttpClient();
+        HttpResponseMessage response = await client.GetAsync("https://localhost:5001/api/users/info/" + curuser);
+        if (response.IsSuccessStatusCode)
+        {
+            this.profileUser = await response.Content.ReadAsAsync<ProfileUser>();
+        }
+    }
+    private void ChnageAchievMode()
+    {
+        AchievMode = !AchievMode;
+    }
+
+    string CssClass()
+    {
+        var cssClass = new List<string>();
+        cssClass.Add("fas");
+        if (this.AchievMode)
+        {
+            cssClass.Add("fa-caret-up");
+        }
+        else
+        {
+            cssClass.Add("fa-caret-down");
+        }
+        return string.Join(' ', cssClass);
+    }
+}
